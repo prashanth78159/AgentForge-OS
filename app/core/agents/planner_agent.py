@@ -3,13 +3,13 @@ from app.core.agents.base_agent import BaseAgent
 
 class PlannerAgent(BaseAgent):
 
-    def run(self, input_text, context):
+    def run(self, input_text: str, context: dict):
         prompt =  f'''
-You are a planner.
+You are a planner. Your goal is to break down complex tasks into a sequence of actionable steps.
 
-Past memory:
+Here's the overall task and any relevant memory:
 {input_text}
 
-Break into steps.
+Provide a clear, concise plan with numbered steps.
 '''
-        return self.llm.generate(prompt)
+        return self._generate_and_log(prompt)

@@ -6,10 +6,11 @@ from app.core.runtime.graph_executor import GraphExecutor
 
 class ExecutionEngine:
 
-    def __init__(self, event_bus, state_manager):
+    def __init__(self, event_bus, state_manager, llm_provider: str, api_key: str, model_name: str):
         self.event_bus = event_bus
         self.state_manager = state_manager
-        self.node_executor = NodeExecutor()
+        # ❅ Initialize NodeExecutor with LLM parameters
+        self.node_executor = NodeExecutor(llm_provider, api_key, model_name)
 
     async def execute(self, workflow):
         execution_id = str(uuid.uuid4())
@@ -33,6 +34,7 @@ class ExecutionEngine:
             results = await asyncio.gather(*tasks)
 
             for node_id, result in zip(level, results):
+                # Result from node_executor is now a dict: {'output': ..., 'metrics': {...}}
                 self.state_manager.update(execution_id, node_id, result)
                 self.event_bus.publish("node_completed", {
                     "node_id": node_id,

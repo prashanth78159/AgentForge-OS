@@ -1,14 +1,13 @@
 
 from app.services.llm_service import LLMService
 from app.core.tools.tool_registry import ToolRegistry
-from google.colab import userdata # For secure API key handling
+# Removed: from google.colab import userdata # For secure API key handling
 
 class NodeExecutor:
 
-    def __init__(self):
-        # 🔑 Get your API key securely from Colab secrets
-        groq_api_key = userdata.get('GROQ_API_KEY') # Assuming you've set 'GROQ_API_KEY' in Colab secrets
-        self.llm = LLMService(api_key=groq_api_key)
+    def __init__(self, llm_provider: str, api_key: str, model_name: str):
+        # 🔑 Initialize LLMService with provider, API key, and model name
+        self.llm = LLMService(llm_provider, api_key, model_name)
         self.tool_registry = ToolRegistry()
         # Register tools in the __init__ method
         self.tool_registry.register("print", lambda p: f"Printed {p.get('message', '')}")
@@ -24,7 +23,17 @@ class NodeExecutor:
 
     async def _execute_llm(self, node, context):
         prompt = node.config.get("prompt", "")
-        return self.llm.generate(prompt)
+        # LLMService.generate now returns (content, prompt_tokens, completion_tokens, cost)
+        response_content, prompt_tokens, completion_tokens, total_cost = self.llm.generate(prompt)
+        # For now, just return the content, but the metrics are available for future use
+        return {
+            "output": response_content,
+            "metrics": {
+                "prompt_tokens": prompt_tokens,
+                "completion_tokens": completion_tokens,
+                "total_cost": total_cost
+            }
+        }
 
     def _execute_tool(self, node, context):
         # Extract 'action' as the tool name, as defined in your workflow Node config
@@ -32,4 +41,4 @@ class NodeExecutor:
         params = node.config.get("params", {})
         if not tool_name:
             raise ValueError("Tool node config must specify an 'action'.")
-        return self.tool_registry.execute(tool_name, params)
+        return {"output": self.tool_registry.execute(tool_name, params)}

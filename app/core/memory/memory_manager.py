@@ -3,7 +3,6 @@ class MemoryManager:
 
     def __init__(self):
         self.sessions = {}
-        # Removed the recursive call: self.memory = MemoryManager()
 
     def get(self, session_id):
         return self.sessions.get(session_id, [])

@@ -3,10 +3,13 @@ from app.core.agents.base_agent import BaseAgent
 
 class CriticAgent(BaseAgent):
 
-    def run(self, input_text, context):
+    def run(self, input_text: str, context: dict):
         prompt = f'''
-Critically evaluate and improve this output:
+You are a critical evaluator. Your role is to analyze the provided output, identify areas for improvement, and suggest concrete revisions.
 
+Here is the output to critique:
 {input_text}
+
+Provide a detailed critique and actionable suggestions for improvement.
 '''
-        return self.llm.generate(prompt)
+        return self._generate_and_log(prompt)
