@@ -1,0 +1,23 @@
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python/
+build/
+dist/
+*.egg-info/
+venv/
+.env/
+
+# Colab specific
+.config/
+*.ipynb
+!app/ui.py
+
+# IDEs and OS
+.idea/
+.vscode/
+.DS_Store
+thumbs.db
